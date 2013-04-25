@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1366818426930
+Build-Jdk: 1.6.0_38
+Built-By: Arquitectura
+Bundle-ManifestVersion: 2
+Bundle-Name: Hello Service Client
+Bundle-SymbolicName: hello-service-client
+Bundle-Version: 0.0.1.SNAPSHOT
+Created-By: Apache Maven Bundle Plugin
+Export-Package: co.edu.uis.sistemas.hello.client;uses:="co.edu.uis.siste
+ mas.hello.api";version="0.0.1.SNAPSHOT"
+Import-Package: co.edu.uis.sistemas.hello.api;version="[0.0,1)"
+Tool: Bnd-1.50.0
