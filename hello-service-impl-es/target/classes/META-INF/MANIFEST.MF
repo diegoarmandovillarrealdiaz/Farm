@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1366898374413
+Build-Jdk: 1.6.0_38
+Built-By: Arquitectura
+Bundle-ManifestVersion: 2
+Bundle-Name: Hello Service Impl (Español)
+Bundle-SymbolicName: hello-service-impl-es
+Bundle-Version: 1.0.0.SNAPSHOT
+Created-By: Apache Maven Bundle Plugin
+Export-Package: com.test;uses:="co.edu.uis.sistemas.hello.api";version="
+ 1.0.0.SNAPSHOT"
+Import-Package: co.edu.uis.sistemas.hello.api;version="[0.0,1)"
+Tool: Bnd-1.50.0
