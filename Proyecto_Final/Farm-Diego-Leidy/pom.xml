@@ -8,7 +8,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 
-	<name>Simple iCasa App</name>
+	<name>Simple iCasa App (Proyecto Final Leidy-Diego)</name>
 
 	<dependencies>
 		<dependency>

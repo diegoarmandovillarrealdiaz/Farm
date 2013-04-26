@@ -27,6 +27,8 @@ import fr.liglab.adele.icasa.device.temperature.Thermometer;
 @Instantiate
 public class SimpleIcasaComponent {
 	
+	private SearchAreasWithThermometersRunnable searchAreasWithThermometersRunnable;
+	
 	@Requires(id="heaters")
 	private Heater[] heaters;
 	
@@ -35,8 +37,6 @@ public class SimpleIcasaComponent {
 	
 	@Requires(id="thermometers")
 	private Thermometer[] thermometers;
-	
-	private Thread modifyLightsThread;
 	
 	
 	@Bind(id="heaters")
@@ -51,8 +51,7 @@ public class SimpleIcasaComponent {
 	
 	@Bind(id="thermometers")
 	protected void bindThermometer(Thermometer thermometer) {
-		thermometer.addListener(changeThermometerLocationLisener);
-		
+		thermometer.addListener(changeThermometerLocationLisener);	
 	}
 
 	@Unbind(id="thermometers")
@@ -60,6 +59,20 @@ public class SimpleIcasaComponent {
 		thermometer.removeListener(changeThermometerLocationLisener);
 		System.out.println("it was removed a thermometer" + thermometer.getSerialNumber());
 	}
+	
+	
+	protected List<Heater> getHeaters() {
+		return Collections.unmodifiableList(Arrays.asList(heaters));
+	}
+	
+	protected List<Cooler> getCoolers() {
+		return Collections.unmodifiableList(Arrays.asList(coolers));
+	}
+	
+	protected List<Thermometer> getThermometers() {
+		return Collections.unmodifiableList(Arrays.asList(thermometers));
+	}
+	
 	
 	private List<Heater> getHeatersIn(String locationName){
 		List<Heater> result = new ArrayList<Heater>();
@@ -107,55 +120,50 @@ public class SimpleIcasaComponent {
 		return result;
 	}
 	 
-	protected List<Heater> getHeaters() {
-		return Collections.unmodifiableList(Arrays.asList(heaters));
-	}
-	
-	
-	
-	protected List<Cooler> getCoolers() {
-		return Collections.unmodifiableList(Arrays.asList(coolers));
-	}
-	
-	protected List<Thermometer> getThermometers() {
-		return Collections.unmodifiableList(Arrays.asList(thermometers));
-	}
-	
-	Thread searchAreasWithThermometersRunnable;
 	
 	@Validate
 	public void start() {
-		searchAreasWithThermometersRunnable= new Thread(new SearchAreasWithThermometersRunnable());
+		searchAreasWithThermometersRunnable= new SearchAreasWithThermometersRunnable();
 		searchAreasWithThermometersRunnable.start();
 	}
 	
 	@Invalidate
 	public void stop() throws InterruptedException {
-		modifyLightsThread.interrupt();
-		modifyLightsThread.join();
-		
 		searchAreasWithThermometersRunnable.interrupt();
 		searchAreasWithThermometersRunnable.join();
+		searchAreasWithThermometersRunnable.stopSearch();
 	}
 
 	
-	public void increaseAllHeater(double increase){
-		List<Heater> heaters = getHeaters();
-		for (Heater het : heaters) {
-			het.setPowerLevel(increase);
-		}
-	}
 	
 		
-	class SearchAreasWithThermometersRunnable implements Runnable {
+	class SearchAreasWithThermometersRunnable extends Thread  {
+
+		public SearchAreasWithThermometersRunnable() {
+	
+		}
+		
+		private volatile boolean running = true;
+		
+		protected boolean isRunning() {
+			return running;
+		}
+
+
+		protected void setRunning(boolean running) {
+			this.running = running;
+		}
+
+		public void stopSearch(){
+			setRunning(false);
+		}
 
 		public void run() {
 				
-			System.out.println("Start Thread");
-			boolean running = true;
+			System.out.println("Thread started");
 			
 			boolean onOff = false;
-			while (running) {
+			while (isRunning()) {
 				
 				onOff = !onOff;
 				try {
@@ -203,12 +211,11 @@ public class SimpleIcasaComponent {
 					
 					Thread.sleep(300);					
 				} catch (InterruptedException e) {
-					running = false;
+					setRunning(false);
 				}
 			}
 			
-			 
-			
+			System.out.println("Thread finished");
 		}
 		
 	}
