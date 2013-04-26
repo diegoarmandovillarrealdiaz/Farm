@@ -156,17 +156,24 @@ public class SimpleIcasaComponent {
 		return Collections.unmodifiableList(Arrays.asList(thermometers));
 	}
 	
+	Thread searchAreasWithThermometersRunnable;
 	
 	@Validate
 	public void start() {
 		modifyLightsThread = new Thread(new ModifyLigthsRunnable());
 		modifyLightsThread.start();
+		
+		searchAreasWithThermometersRunnable= new Thread(new SearchAreasWithThermometersRunnable());
+		searchAreasWithThermometersRunnable.start();
 	}
 	
 	@Invalidate
 	public void stop() throws InterruptedException {
 		modifyLightsThread.interrupt();
 		modifyLightsThread.join();
+		
+		searchAreasWithThermometersRunnable.interrupt();
+		searchAreasWithThermometersRunnable.join();
 	}
 
 	
@@ -258,7 +265,8 @@ public class SimpleIcasaComponent {
 						 getCoolerIn(tem);
 						 getHeatersIn(tem);
 					 }
-					Thread.sleep(1000);					
+					 System.out.println("Check temperature");
+					Thread.sleep(200);					
 				} catch (InterruptedException e) {
 					running = false;
 				}
