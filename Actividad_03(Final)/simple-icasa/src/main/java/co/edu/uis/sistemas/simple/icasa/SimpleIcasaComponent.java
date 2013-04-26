@@ -167,7 +167,7 @@ public class SimpleIcasaComponent {
 						 if(temperatur>300){
 							 List<Cooler>coolers =  getCoolerIn(tem);
 							 for(Cooler cooler: coolers){
-								 cooler.setPowerLevel(0.8);
+								 cooler.setPowerLevel(1);
 							 }
 							 List<Heater>heaters =  getHeatersIn(tem);
 							 for(Heater heater: heaters){
@@ -184,7 +184,7 @@ public class SimpleIcasaComponent {
 							 }
 							 List<Heater>heaters =  getHeatersIn(tem);
 							 for(Heater heater: heaters){
-								 heater.setPowerLevel(0.8);
+								 heater.setPowerLevel(1);
 							 }
 						 }else{
 							 List<Cooler>coolers =  getCoolerIn(tem);

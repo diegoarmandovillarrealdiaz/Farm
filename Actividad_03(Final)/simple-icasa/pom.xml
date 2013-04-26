@@ -4,7 +4,7 @@
 	<!-- Project description -->
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>co.edu.uis.sistemas</groupId>
-	<artifactId>simple-icasa</artifactId>
+	<artifactId>simple-icasa-farm</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>bundle</packaging>
 
