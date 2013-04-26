@@ -106,7 +106,7 @@ public class SimpleIcasaComponent {
 		
 		return result;
 	}
-	
+	 
 	protected List<Heater> getHeaters() {
 		return Collections.unmodifiableList(Arrays.asList(heaters));
 	}
@@ -161,13 +161,13 @@ public class SimpleIcasaComponent {
 				try {
 					Set<String> areas=getAreasWithThermometer().keySet();
 					
-					
 					 for(String tem:areas){
 						 double temperatur = (getAreasWithThermometer().get(tem).get(0)).getTemperature();
+						 
 						 if(temperatur>300){
 							 List<Cooler>coolers =  getCoolerIn(tem);
 							 for(Cooler cooler: coolers){
-								 cooler.setPowerLevel(0.5);
+								 cooler.setPowerLevel(0.8);
 							 }
 							 List<Heater>heaters =  getHeatersIn(tem);
 							 for(Heater heater: heaters){
@@ -176,13 +176,15 @@ public class SimpleIcasaComponent {
 							 
 							 
 						 }else if(temperatur<290){
+							 
 							 List<Cooler>coolers =  getCoolerIn(tem);
+							 
 							 for(Cooler cooler: coolers){
 								 cooler.setPowerLevel(0);
 							 }
 							 List<Heater>heaters =  getHeatersIn(tem);
 							 for(Heater heater: heaters){
-								 heater.setPowerLevel(0.5);
+								 heater.setPowerLevel(0.8);
 							 }
 						 }else{
 							 List<Cooler>coolers =  getCoolerIn(tem);
@@ -199,7 +201,7 @@ public class SimpleIcasaComponent {
 						 getHeatersIn(tem);
 					 }
 					
-					Thread.sleep(200);					
+					Thread.sleep(300);					
 				} catch (InterruptedException e) {
 					running = false;
 				}
