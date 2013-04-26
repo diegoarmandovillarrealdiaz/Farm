@@ -27,7 +27,7 @@ import fr.liglab.adele.icasa.device.temperature.Thermometer;
 @Instantiate
 public class SimpleIcasaComponent {
 	
-	private SearchAreasWithThermometersRunnable searchAreasWithThermometersRunnable;
+	private CheckTemperaturThread checkTemperaturThread;
 	
 	@Requires(id="heaters")
 	private Heater[] heaters;
@@ -57,7 +57,10 @@ public class SimpleIcasaComponent {
 	@Unbind(id="thermometers")
 	protected void unBindHeater(Thermometer thermometer) {
 		thermometer.removeListener(changeThermometerLocationLisener);
-		System.out.println("it was removed a thermometer" + thermometer.getSerialNumber());
+		String thermometerLocation = (String)thermometer.getPropertyValue(GenericDevice.LOCATION_PROPERTY_NAME);
+		setPowerLevelToAllCoolers(thermometerLocation, 0);
+		setPowerLevelToAllHeaters(thermometerLocation, 0);
+		
 	}
 	
 	
@@ -104,9 +107,7 @@ public class SimpleIcasaComponent {
 		return result;
 	}
 	
-	
-	
-	private Map<String,List<Thermometer>> getAreasWithThermometer(){
+	private Map<String,List<Thermometer>> getZonesthatcontainThermometers(){
 		Map<String,List<Thermometer>> result = new HashMap<String, List<Thermometer>>();
 		List<Thermometer> currentThermometers = getThermometers();
 		for (Thermometer thermometer : currentThermometers) {
@@ -123,34 +124,34 @@ public class SimpleIcasaComponent {
 	
 	@Validate
 	public void start() {
-		searchAreasWithThermometersRunnable= new SearchAreasWithThermometersRunnable();
-		searchAreasWithThermometersRunnable.start();
+		checkTemperaturThread= new CheckTemperaturThread();
+		checkTemperaturThread.start();
 	}
 	
 	@Invalidate
 	public void stop() throws InterruptedException {
-		searchAreasWithThermometersRunnable.interrupt();
-		searchAreasWithThermometersRunnable.join();
-		searchAreasWithThermometersRunnable.stopSearch();
+		checkTemperaturThread.interrupt();
+		checkTemperaturThread.join();
+		checkTemperaturThread.stopSearch();
 	}
 
 	
 	
 		
-	class SearchAreasWithThermometersRunnable extends Thread  {
+	class CheckTemperaturThread extends Thread  {
 
-		public SearchAreasWithThermometersRunnable() {
+		public CheckTemperaturThread() {
 	
 		}
 		
 		private volatile boolean running = true;
 		
-		protected boolean isRunning() {
+		private boolean isRunning() {
 			return running;
 		}
 
 
-		protected void setRunning(boolean running) {
+		private void setRunning(boolean running) {
 			this.running = running;
 		}
 
@@ -162,51 +163,27 @@ public class SimpleIcasaComponent {
 				
 			System.out.println("Thread started");
 			
-			boolean onOff = false;
 			while (isRunning()) {
 				
-				onOff = !onOff;
 				try {
-					Set<String> areas=getAreasWithThermometer().keySet();
+					Set<String> zones=getZonesthatcontainThermometers().keySet();
 					
-					 for(String tem:areas){
-						 double temperatur = (getAreasWithThermometer().get(tem).get(0)).getTemperature();
+					 for(String zone:zones){
+						 double temperatur = (getZonesthatcontainThermometers().get(zone).get(0)).getTemperature();
 						 
 						 if(temperatur>300){
-							 List<Cooler>coolers =  getCoolerIn(tem);
-							 for(Cooler cooler: coolers){
-								 cooler.setPowerLevel(1);
-							 }
-							 List<Heater>heaters =  getHeatersIn(tem);
-							 for(Heater heater: heaters){
-								 heater.setPowerLevel(0);
-							 }
-							 
-							 
+							 setPowerLevelToAllCoolers(zone,1);
+							 setPowerLevelToAllHeaters(zone,0);
 						 }else if(temperatur<290){
-							 
-							 List<Cooler>coolers =  getCoolerIn(tem);
-							 
-							 for(Cooler cooler: coolers){
-								 cooler.setPowerLevel(0);
-							 }
-							 List<Heater>heaters =  getHeatersIn(tem);
-							 for(Heater heater: heaters){
-								 heater.setPowerLevel(1);
-							 }
+							 setPowerLevelToAllCoolers(zone,0);
+							 setPowerLevelToAllHeaters(zone,1);
 						 }else{
-							 List<Cooler>coolers =  getCoolerIn(tem);
-							 for(Cooler cooler: coolers){
-								 cooler.setPowerLevel(0);
-							 }
-							 List<Heater>heaters =  getHeatersIn(tem);
-							 for(Heater heater: heaters){
-								 heater.setPowerLevel(0);
-							 }
+							 setPowerLevelToAllCoolers(zone,0);
+							 setPowerLevelToAllHeaters(zone,0);
 						 }
 						 
-						 getCoolerIn(tem);
-						 getHeatersIn(tem);
+						 getCoolerIn(zone);
+						 getHeatersIn(zone);
 					 }
 					
 					Thread.sleep(300);					
@@ -220,6 +197,19 @@ public class SimpleIcasaComponent {
 		
 	}
 
+	private void setPowerLevelToAllCoolers(String zone,double powerLevel){
+		 List<Cooler>coolers =  getCoolerIn(zone);
+		 for(Cooler cooler: coolers){
+			 cooler.setPowerLevel(powerLevel);
+		 }
+	}
+	
+	private void setPowerLevelToAllHeaters(String zone,double powerLevel){
+		List<Heater>heaters =  getHeatersIn(zone);
+		 for(Heater heater: heaters){
+			 heater.setPowerLevel(powerLevel);
+		 }
+	}
 	
 	private void showInConsoleHeatersAndLightsIn(String location){
 		List<Heater> heaters = getHeatersIn(location);
