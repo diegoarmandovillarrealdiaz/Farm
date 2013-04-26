@@ -41,12 +41,24 @@ public class SimpleIcasaComponent {
 	
 	@Bind(id="heaters")
 	protected void bindHeater(Heater heater) {
-		
+		heater.setPowerLevel(0);
+		heater.addListener(changeHeaterLocationLisener);
+	}
+	
+	@Unbind(id="heaters")
+	protected void unBindHeater(Heater heater) {
+		heater.removeListener(changeHeaterLocationLisener);
 	}
 	
 	@Bind(id="coolers")
 	protected void bindCooler(Cooler cooler) {
-		
+		cooler.setPowerLevel(0);
+		cooler.addListener(changeCoolerLocationLisener);	
+	}
+	
+	@Unbind(id="coolers")
+	protected void unBindCooler(Cooler cooler) {
+		cooler.removeListener(changeCoolerLocationLisener);
 	}
 	
 	@Bind(id="thermometers")
@@ -55,7 +67,7 @@ public class SimpleIcasaComponent {
 	}
 
 	@Unbind(id="thermometers")
-	protected void unBindHeater(Thermometer thermometer) {
+	protected void unBindThermometers(Thermometer thermometer) {
 		thermometer.removeListener(changeThermometerLocationLisener);
 		String thermometerLocation = (String)thermometer.getPropertyValue(GenericDevice.LOCATION_PROPERTY_NAME);
 		setPowerLevelToAllCoolers(thermometerLocation, 0);
@@ -135,8 +147,6 @@ public class SimpleIcasaComponent {
 		checkTemperaturThread.stopSearch();
 	}
 
-	
-	
 		
 	class CheckTemperaturThread extends Thread  {
 
@@ -211,19 +221,6 @@ public class SimpleIcasaComponent {
 		 }
 	}
 	
-	private void showInConsoleHeatersAndLightsIn(String location){
-		List<Heater> heaters = getHeatersIn(location);
-		
-		String heatersMessage = "("+heaters.size()+") Heaters in ["+location+"] with the serial Numbers: ";
-		
-		for(Heater heater:heaters){
-			heatersMessage+=heater.getSerialNumber()+".";
-		}
-		
-		System.out.println(heatersMessage);
-		
-	}
-	
 	private DeviceListener changeThermometerLocationLisener=new DeviceListener() {
 		
 		public void deviceRemoved(GenericDevice arg0) {
@@ -244,9 +241,85 @@ public class SimpleIcasaComponent {
 				String location=(String)device.getPropertyValue(GenericDevice.LOCATION_PROPERTY_NAME);
 				System.out.println("Thermometer id: "+device.getSerialNumber()+" , location: "+location);
 				
-				showInConsoleHeatersAndLightsIn(location);
 			}else{
-				System.out.println("property: ["+property+"] value: ["+value+"]");
+				System.out.println("property: ["+property+"] old value: ["+value+"]");
+			}
+			
+		}
+		
+		public void devicePropertyAdded(GenericDevice arg0, String arg1) {
+			// DO NOTHING
+			
+		}
+		
+		public void deviceAdded(GenericDevice arg0) {
+			// DO NOTHING
+			
+		}
+	};
+	
+	private DeviceListener changeCoolerLocationLisener=new DeviceListener() {
+		
+		public void deviceRemoved(GenericDevice arg0) {
+			// DO NOTHING
+			
+		}
+		
+		public void devicePropertyRemoved(GenericDevice arg0, String arg1) {
+			// DO NOTHING
+			
+		}
+		
+		public void devicePropertyModified(GenericDevice device, String property,
+				Object value) {
+			
+			if(property != null && property.equals(GenericDevice.LOCATION_PROPERTY_NAME)){
+				
+				String location=(String)device.getPropertyValue(GenericDevice.LOCATION_PROPERTY_NAME);
+				((Cooler)device).setPowerLevel(0);
+				System.out.println("Cooler id: "+device.getSerialNumber()+" , location: "+location+", power level set to 0 ");
+				
+			}else{
+				System.out.println("property: ["+property+"] old value: ["+value+"]");
+			}
+			
+			
+		}
+		
+		public void devicePropertyAdded(GenericDevice arg0, String arg1) {
+			// DO NOTHING
+			
+		}
+		
+		public void deviceAdded(GenericDevice arg0) {
+			// DO NOTHING
+			
+		}
+	};
+	
+	private DeviceListener changeHeaterLocationLisener=new DeviceListener() {
+		
+		public void deviceRemoved(GenericDevice arg0) {
+			// DO NOTHING
+			
+		}
+		
+		public void devicePropertyRemoved(GenericDevice arg0, String arg1) {
+			// DO NOTHING
+			
+		}
+		
+		public void devicePropertyModified(GenericDevice device, String property,
+				Object value) {
+			
+			if(property != null && property.equals(GenericDevice.LOCATION_PROPERTY_NAME)){
+				
+				String location=(String)device.getPropertyValue(GenericDevice.LOCATION_PROPERTY_NAME);
+				((Heater)device).setPowerLevel(0);
+				System.out.println("Heater id: "+device.getSerialNumber()+" , location: "+location+", power level set to 0 ");
+				
+			}else{
+				System.out.println("property: ["+property+"] old value: ["+value+"]");
 			}
 			
 			
