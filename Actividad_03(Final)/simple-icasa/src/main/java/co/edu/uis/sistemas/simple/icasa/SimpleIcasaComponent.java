@@ -3,7 +3,10 @@ package co.edu.uis.sistemas.simple.icasa;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.felix.ipojo.annotations.Bind;
 import org.apache.felix.ipojo.annotations.Component;
@@ -16,6 +19,7 @@ import org.apache.felix.ipojo.annotations.Validate;
 import fr.liglab.adele.icasa.device.DeviceListener;
 import fr.liglab.adele.icasa.device.GenericDevice;
 import fr.liglab.adele.icasa.device.light.BinaryLight;
+import fr.liglab.adele.icasa.device.temperature.Cooler;
 import fr.liglab.adele.icasa.device.temperature.Heater;
 import fr.liglab.adele.icasa.device.temperature.Thermometer;
 
@@ -30,6 +34,9 @@ public class SimpleIcasaComponent {
 	@Requires(id="heaters")
 	private Heater[] heaters;
 	
+	@Requires(id="coolers")
+	private Cooler[] coolers;
+	
 	@Requires(id="thermometers")
 	private Thermometer[] thermometers;
 	
@@ -43,6 +50,11 @@ public class SimpleIcasaComponent {
 	@Bind(id="heaters")
 	protected void bindHeater(Heater heater) {
 		System.out.println("A new heater has been added to the platform " + heater.getSerialNumber());
+	}
+	
+	@Bind(id="coolers")
+	protected void bindCooler(Cooler cooler) {
+		System.out.println("A new cooler has been added to the platform " + cooler.getSerialNumber());
 	}
 	
 	@Bind(id="thermometers")
@@ -77,6 +89,26 @@ public class SimpleIcasaComponent {
 		return result;
 	}
 	
+	private List<Cooler> getCoolerIn(String locationName){
+		List<Cooler> result = new ArrayList<Cooler>();
+		if(locationName != null && !locationName.equals(GenericDevice.LOCATION_UNKNOWN)){
+			List<Cooler> currentCoolers = getCoolers();
+			System.out.println("Coolers number: "+currentCoolers.size());
+			System.out.println("Location: "+locationName);
+			for (Cooler cooler : currentCoolers) {
+				String heaterLocation = (String)cooler.getPropertyValue(GenericDevice.LOCATION_PROPERTY_NAME);
+				if(locationName.equals(heaterLocation)){
+					result.add(cooler);
+				}
+			}
+		}{
+			System.out.println("Curioso-location:"+locationName);
+		}
+		
+		
+		return result;
+	}
+	
 	
 	private List<BinaryLight> getLightsIn(String locationName){
 		List<BinaryLight> result = new ArrayList<BinaryLight>();
@@ -93,12 +125,35 @@ public class SimpleIcasaComponent {
 		return result;
 	}
 	
+	
+	private Map<String,List<Thermometer>> getAreasWithThermometer(){
+		Map<String,List<Thermometer>> result = new HashMap<String, List<Thermometer>>();
+		List<Thermometer> currentThermometers = getThermometers();
+		for (Thermometer thermometer : currentThermometers) {
+			String heaterLocation = (String)thermometer.getPropertyValue(GenericDevice.LOCATION_PROPERTY_NAME);
+			if(!result.containsKey(heaterLocation)){
+				result.put(heaterLocation, new ArrayList<Thermometer>());
+			}
+			result.get(heaterLocation).add(thermometer);
+		}
+		
+		return result;
+	}
+	
 	protected List<Heater> getHeaters() {
 		return Collections.unmodifiableList(Arrays.asList(heaters));
 	}
 	
 	protected List<BinaryLight> getLights() {
 		return Collections.unmodifiableList(Arrays.asList(lights));
+	}
+	
+	protected List<Cooler> getCoolers() {
+		return Collections.unmodifiableList(Arrays.asList(coolers));
+	}
+	
+	protected List<Thermometer> getThermometers() {
+		return Collections.unmodifiableList(Arrays.asList(thermometers));
 	}
 	
 	
@@ -154,6 +209,67 @@ public class SimpleIcasaComponent {
 		}
 		
 	}
+	
+	class SearchAreasWithThermometersRunnable implements Runnable {
+
+		public void run() {
+				
+			
+			boolean running = true;
+
+			boolean onOff = false;
+			while (running) {
+				onOff = !onOff;
+				try {
+					Set<String> areas=getAreasWithThermometer().keySet();
+					 for(String tem:areas){
+						 double temperatur = ((Thermometer)getAreasWithThermometer().get(tem)).getTemperature();
+						 if(temperatur>300){
+							 List<Cooler>coolers =  getCoolerIn(tem);
+							 for(Cooler cooler: coolers){
+								 cooler.setPowerLevel(0.5);
+							 }
+							 List<Heater>heaters =  getHeatersIn(tem);
+							 for(Heater heater: heaters){
+								 heater.setPowerLevel(0);
+							 }
+							 
+							 
+						 }else if(temperatur<290){
+							 List<Cooler>coolers =  getCoolerIn(tem);
+							 for(Cooler cooler: coolers){
+								 cooler.setPowerLevel(0);
+							 }
+							 List<Heater>heaters =  getHeatersIn(tem);
+							 for(Heater heater: heaters){
+								 heater.setPowerLevel(0.5);
+							 }
+						 }else{
+							 List<Cooler>coolers =  getCoolerIn(tem);
+							 for(Cooler cooler: coolers){
+								 cooler.setPowerLevel(0);
+							 }
+							 List<Heater>heaters =  getHeatersIn(tem);
+							 for(Heater heater: heaters){
+								 heater.setPowerLevel(0);
+							 }
+						 }
+						 
+						 getCoolerIn(tem);
+						 getHeatersIn(tem);
+					 }
+					Thread.sleep(1000);					
+				} catch (InterruptedException e) {
+					running = false;
+				}
+			}
+			
+			 
+			
+		}
+		
+	}
+
 	
 	private void showInConsoleHeatersAndLightsIn(String location){
 		List<Heater> heaters = getHeatersIn(location);
