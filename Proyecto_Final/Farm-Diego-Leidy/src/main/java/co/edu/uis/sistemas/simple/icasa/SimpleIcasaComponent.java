@@ -128,20 +128,41 @@ public class SimpleIcasaComponent {
 		
 	}
 	
-	
+	/**
+	 * Lista de los calentadores disponibles.
+	 * 
+	 * @return
+	 */
 	protected List<Heater> getHeaters() {
 		return Collections.unmodifiableList(Arrays.asList(heaters));
 	}
 	
+	/**
+	 * Lista de los ventiladores disponibles.
+	 * 
+	 * @return
+	 */
 	protected List<Cooler> getCoolers() {
 		return Collections.unmodifiableList(Arrays.asList(coolers));
 	}
 	
+	/**
+	 * Lista de los termómetros disponibles.
+	 * 
+	 * @return
+	 */
 	protected List<Thermometer> getThermometers() {
 		return Collections.unmodifiableList(Arrays.asList(thermometers));
 	}
 	
-	
+	/**
+	 * 
+	 * Obtiene los calentadores que se encuentran en la zona indicada.
+	 * 
+	 * @param locationName zona de interés.
+	 * 
+	 * @return
+	 */
 	private List<Heater> getHeatersIn(String locationName){
 		List<Heater> result = new ArrayList<Heater>();
 		if(locationName != null && !locationName.equals(GenericDevice.LOCATION_UNKNOWN)){
@@ -158,6 +179,14 @@ public class SimpleIcasaComponent {
 		return result;
 	}
 	
+	/**
+	 * 
+	 * Obtiene los ventiladores que se encuentran en la zona indicada.
+	 * 
+	 * @param locationName zona de interés.
+	 * 
+	 * @return
+	 */
 	private List<Cooler> getCoolerIn(String locationName){
 		List<Cooler> result = new ArrayList<Cooler>();
 		if(locationName != null && !locationName.equals(GenericDevice.LOCATION_UNKNOWN)){
@@ -172,6 +201,13 @@ public class SimpleIcasaComponent {
 		return result;
 	}
 	
+	/**
+	 * 
+	 * Obtiene los temómetros que se encuentran en la zona indicada.
+	 * 
+	 * @param locationName zona de interés.
+	 * @return
+	 */
 	private Map<String,List<Thermometer>> getZonesthatcontainThermometers(){
 		Map<String,List<Thermometer>> result = new HashMap<String, List<Thermometer>>();
 		List<Thermometer> currentThermometers = getThermometers();
@@ -186,13 +222,18 @@ public class SimpleIcasaComponent {
 		return result;
 	}
 	 
-	
+	/**
+	 * Al iniciar el componente se inicia el hilo que se encarga de controlar los ventiladores y calentadores.
+	 */
 	@Validate
 	public void start() {
 		checkTemperaturThread= new CheckTemperaturThread();
 		checkTemperaturThread.start();
 	}
 	
+	/**
+	 * Al terminar el componente se debe finalizar el hilo.
+	 */
 	@Invalidate
 	public void stop() throws InterruptedException {
 		checkTemperaturThread.interrupt();
@@ -200,6 +241,15 @@ public class SimpleIcasaComponent {
 		checkTemperaturThread.stopSearch();
 	}
 
+	/**
+	 * 
+	 * Clase usada para monitoraer los temometros hubicadados en cada una de las zonas de la casa y de esta 
+	 * forma encender o apagar los calentadores y ventiladores.
+	 * 
+	 * 
+	 * @author Leidy Guarin
+	 *
+	 */
 		
 	class CheckTemperaturThread extends Thread  {
 
@@ -207,17 +257,23 @@ public class SimpleIcasaComponent {
 	
 		}
 		
+		/**
+		 * Bandera usada para controlar la finalización del hilo.
+		 * 
+		 */
 		private volatile boolean running = true;
 		
 		private boolean isRunning() {
 			return running;
 		}
 
-
 		private void setRunning(boolean running) {
 			this.running = running;
 		}
 
+		/**
+		 * Este metodo debe ser llamada para terminar el ejecución del hilo.
+		 */
 		public void stopSearch(){
 			setRunning(false);
 		}
@@ -229,18 +285,22 @@ public class SimpleIcasaComponent {
 			while (isRunning()) {
 				
 				try {
+					//Se obtienen todas las zonas que por lo menos  tienen un termómetro.
 					Set<String> zones=getZonesthatcontainThermometers().keySet();
 					
-					 for(String zone:zones){
+					 for(String zone:zones){//Se recorre cada zona.
+						 
+						 //Se obtiene la temperatura de cada una de las zonas.
+						 //Se asume que todos los termómetros de una zona perciben al misma temperatura.
 						 double temperatur = (getZonesthatcontainThermometers().get(zone).get(0)).getTemperature();
 						 
-						 if(temperatur>300){
+						 if(temperatur>300){//Si la temperatura es mayor a 300 se debe enfriar la zona.							
 							 setPowerLevelToAllCoolers(zone,1);
 							 setPowerLevelToAllHeaters(zone,0);
-						 }else if(temperatur<290){
+						 }else if(temperatur<290){//Si la temperatura es menor a 290 se debe calentar la zona.	
 							 setPowerLevelToAllCoolers(zone,0);
 							 setPowerLevelToAllHeaters(zone,1);
-						 }else{
+						 }else{//En cualquier otro caso no se hace nada.
 							 setPowerLevelToAllCoolers(zone,0);
 							 setPowerLevelToAllHeaters(zone,0);
 						 }
@@ -249,7 +309,7 @@ public class SimpleIcasaComponent {
 						 getHeatersIn(zone);
 					 }
 					
-					Thread.sleep(300);					
+					Thread.sleep(300);// dormir el hilo por 300 iniciar una nueva revisión.					
 				} catch (InterruptedException e) {
 					setRunning(false);
 				}
