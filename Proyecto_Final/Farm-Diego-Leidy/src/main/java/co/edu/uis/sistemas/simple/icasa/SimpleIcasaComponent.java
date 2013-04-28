@@ -23,49 +23,102 @@ import fr.liglab.adele.icasa.device.temperature.Heater;
 import fr.liglab.adele.icasa.device.temperature.Thermometer;
 
 
+
+/**
+ * 
+ * Este componente se encarga de controlar al temperatura en los cuartos en los que se encuentre un termómetro. Haciendo
+ * uso de los ventiladores y calentadores disponibles.
+ * 
+ * @author Leidy Guarin
+ *
+ */
 @Component(name="SimpleIcasaComponent")
 @Instantiate
 public class SimpleIcasaComponent {
 	
+	/**
+	 * Instancia del hilo encargado de revisar la temperatura y de esta forma encender o apagar ventiladores y calentadores.
+	 * 
+	 */
 	private CheckTemperaturThread checkTemperaturThread;
 	
+	/**
+	 * Arreglo con los calentadores disponibles.
+	 */
 	@Requires(id="heaters")
 	private Heater[] heaters;
 	
+	/**
+	 * Arreglo con los ventiladores disponibles.
+	 * 
+	 */
 	@Requires(id="coolers")
 	private Cooler[] coolers;
 	
+	/**
+	 * Arreglo con los termómetros disponibles.
+	 * 
+	 */
 	@Requires(id="thermometers")
 	private Thermometer[] thermometers;
 	
-	
+	/**
+	 * Al añadirse un calentador, se le asigna un nivel de energía de 0 y 
+	 * se añade un listener para detectar los cambios de zona.
+	 *  
+	 */
 	@Bind(id="heaters")
 	protected void bindHeater(Heater heater) {
 		heater.setPowerLevel(0);
 		heater.addListener(changeHeaterLocationLisener);
 	}
 	
+	/**
+	 * Al remover  un calendaros, hay que remover el listener añadido.
+	 * 
+	 * @param heater
+	 */
 	@Unbind(id="heaters")
 	protected void unBindHeater(Heater heater) {
-		heater.removeListener(changeHeaterLocationLisener);
+		heater.removeListener(changeHeaterLocationLisener); 
 	}
 	
+	/**
+	 * Al añadirse un ventilador, se le asigna un nivel de energía de 0 y 
+	 * se añade un listener para detectar los cambios de zona. 
+	 */
 	@Bind(id="coolers")
 	protected void bindCooler(Cooler cooler) {
 		cooler.setPowerLevel(0);
-		cooler.addListener(changeCoolerLocationLisener);	
+		cooler.addListener(changeCoolerLocationLisener);
 	}
 	
+
+	/**
+	 * Al remover un ventilador, hay que remover el listener añadido.
+	 * 
+	 * @param heater
+	 */
 	@Unbind(id="coolers")
 	protected void unBindCooler(Cooler cooler) {
-		cooler.removeListener(changeCoolerLocationLisener);
+		cooler.removeListener(changeCoolerLocationLisener); 
 	}
 	
+	/**
+	 * Al añadirse un termómetro, se añade un listener para detectar los cambios de zona. 
+	 * 
+	 */
 	@Bind(id="thermometers")
 	protected void bindThermometer(Thermometer thermometer) {
 		thermometer.addListener(changeThermometerLocationLisener);	
 	}
 
+	/**
+	 * Al remover un termómetro, hay que remover el listener añadido y asignar un nivel de energio
+	 * de 0 a todos los ventiladores y calentadores.
+	 *  
+	 * @param heater
+	 */
 	@Unbind(id="thermometers")
 	protected void unBindThermometers(Thermometer thermometer) {
 		thermometer.removeListener(changeThermometerLocationLisener);
