@@ -320,6 +320,12 @@ public class SimpleIcasaComponent {
 		
 	}
 
+	/**
+	 * Cambia el nivel de energía a todos los ventiladores ubicados en la zona indicada.
+	 * 
+	 * @param zone zona de interés.
+	 * @param powerLevel nivel de energía deseado.
+	 */
 	private void setPowerLevelToAllCoolers(String zone,double powerLevel){
 		 List<Cooler>coolers =  getCoolerIn(zone);
 		 for(Cooler cooler: coolers){
@@ -327,6 +333,12 @@ public class SimpleIcasaComponent {
 		 }
 	}
 	
+	/**
+	 * Cambia el nivel de energía a todos los calentadores ubicados en la zona indicada.
+	 * 
+	 * @param zone zona de interés.
+	 * @param powerLevel nivel de energía deseado.
+	 */
 	private void setPowerLevelToAllHeaters(String zone,double powerLevel){
 		List<Heater>heaters =  getHeatersIn(zone);
 		 for(Heater heater: heaters){
@@ -334,6 +346,10 @@ public class SimpleIcasaComponent {
 		 }
 	}
 	
+	/**
+	 * Listener usado para saber cuando un termómetro se cambia de zona.
+	 * 
+	 */
 	private DeviceListener changeThermometerLocationLisener=new DeviceListener() {
 		
 		public void deviceRemoved(GenericDevice arg0) {
@@ -371,6 +387,11 @@ public class SimpleIcasaComponent {
 		}
 	};
 	
+	/**
+	 * Listener usado para saber cuando un ventilador se cambia de zona.
+	 * Se asume que cuando se cambia de zona hay que reducir su nivel de energía a 0.
+	 * 
+	 */
 	private DeviceListener changeCoolerLocationLisener=new DeviceListener() {
 		
 		public void deviceRemoved(GenericDevice arg0) {
@@ -410,6 +431,11 @@ public class SimpleIcasaComponent {
 		}
 	};
 	
+	/**
+	 * Listener usado para saber cuando un calentador se cambia de zona.
+	 * Se asume que cuando se cambia de zona hay que reducir su nivel de energía a 0.
+	 * 
+	 */
 	private DeviceListener changeHeaterLocationLisener=new DeviceListener() {
 		
 		public void deviceRemoved(GenericDevice arg0) {
