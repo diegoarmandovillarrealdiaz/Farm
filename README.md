@@ -11,6 +11,7 @@ Supuestos :
 - Todos los termómetros de una misma zona perciben al misma temperatura.
 - Al cambiar de zona un ventilador o calentador, hay que reducir su nivel de energía a 0 (Desconectarlo).
 - Al remover un termómetro de una zona hay que reducir a 0, el nivel de energía los ventiladores y calentadores.
+- Al cambiar de zona un termómetro, se debe reducir el nivel de energía a 0 tanto de ventiladores como de calentadores ubicados en la zona donde se encontraba el termómetro, claro en caso de no haber más termometros (no se tiene punto de referencia).
 
 Algoritmo usado:
 ====
@@ -25,9 +26,9 @@ El espíritu de esta rutina es hacer uso de los hilos y listeners. Por esta raz�
 
 2-2: De acuerdo a la temperatura se realizan las siguientes acciones:
 
-2-2-1: Si la temperatura es mayor al valor máximo establecido, se encienden los ventiladores y se apagan los calentadores.
+2-2-1: Si la temperatura es mayor al valor máximo establecido (300), se encienden los ventiladores y se apagan los calentadores.
 
-2-2-2: Si la temperatura es menor que el valor mínimo establecido, se encienden los calentadores y se apagan los ventiladores.
+2-2-2: Si la temperatura es menor que el valor mínimo establecido (290), se encienden los calentadores y se apagan los ventiladores.
 
 2-2-3: en cualquier otro caso se apagan ventiladores y calentadores
 
