@@ -34,3 +34,23 @@ El espíritu de esta rutina es hacer uso de los hilos y listeners. Por esta raz�
 
 3- Se duerme la ejecución actual por 300 milisegundos
 
+
+Limitaciones de la rutina
+====
+
+- Realizar una revisión de la casa cada 300 milisegundos genera una sobre cargar computacional innecesario, cuando no hay cambios. 
+
+Problemas de la implementación actual
+====
+- En el hijo se corre el riesgo de obtener una excepción a la hora de obtener la temperatura (Por algún motivo se mueve el único termómetro de una zona en el momento justo) , la siguiente linea puede fallar
+  
+  double temperatur = (getZonesthatcontainThermometers().get(zone).get(0)).getTemperature();
+
+
+Posibles mejoras
+====
+
+- Modificar los métodos  co.edu.uis.sistemas.simple.icasa.SimpleIcasaComponent.setPowerLevelToAllCoolers(String, double) y co.edu.uis.sistemas.simple.icasa.SimpleIcasaComponent.setPowerLevelToAllHeaters(String, double) para que de acuerdo al número de ventiladores regule el nivel de poder de cada uno.
+La idea sería definir un nivel de poder máximo por cuarto, para de esta forma ahorrar energía al no usar más de esa cantidad.
+
+- Teniendo en cuenta lo anterior hay que definir un nivel mínimo de poder en cada ventilador y calentador, es decir por debajo de este número se usaría 0. Mantener niveles cercanos a cero no tiene mucho sentido. Dado que no sería perceptible un cambio en el temperatura del  cuarto.
