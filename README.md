@@ -6,12 +6,14 @@ El proyecto final se encuentra ubicado en :
 https://github.com/diegoarmandovillarrealdiaz/Farm/tree/master/Proyecto_Final/Farm-Diego-Leidy
 
 Supuestos :
+====
 
 - Todos los termómetros de una misma zona perciben al misma temperatura.
 - Al cambiar de zona un ventilador o calentador, hay que reducir su nivel de energía a 0 (Desconectarlo).
 - Al remover un termómetro de una zona hay que reducir a 0, el nivel de energía los ventiladores y calentadores.
 
 Algoritmo usado:
+====
 
 El espíritu de esta rutina es hacer uso de los hilos y listeners. Por esta razón se cuenta con un hilo que monitorea la casa cada 300 milisegundos con el objetivo de tomar acciones. A su vez se han añadido unos listener a los dispositivos para detectar los cambios de zona (ver supuestos)  
 1- Se obtiene todas las zonas que tiene por lo menos un termómetro
