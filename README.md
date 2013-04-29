@@ -16,6 +16,7 @@ Algoritmo usado:
 ====
 
 El espíritu de esta rutina es hacer uso de los hilos y listeners. Por esta razón se cuenta con un hilo que monitorea la casa cada 300 milisegundos con el objetivo de tomar acciones. A su vez se han añadido unos listener a los dispositivos para detectar los cambios de zona (ver supuestos)  
+
 1- Se obtiene todas las zonas que tiene por lo menos un termómetro
 
 2- Se itera sobre cada una de las zonas devueltas:
@@ -32,5 +33,3 @@ El espíritu de esta rutina es hacer uso de los hilos y listeners. Por esta raz�
 
 3- Se duerme la ejecución actual por 300 milisegundos
 
-Otros
-______
