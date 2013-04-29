@@ -36,6 +36,13 @@ import fr.liglab.adele.icasa.device.temperature.Thermometer;
 @Instantiate
 public class SimpleIcasaComponent {
 	
+	
+	public static final int MAX_TEMPERATUR_ALLOWED = 300;
+	
+	public static final int MIN_TEMPERATUR_ALLOWED = 290;
+	
+	public static final int DEFAULT_DEVICE_POWER_LEVEL = 1;
+	
 	/**
 	 * Instancia del hilo encargado de revisar la temperatura y de esta forma encender o apagar ventiladores y calentadores.
 	 * 
@@ -192,8 +199,8 @@ public class SimpleIcasaComponent {
 		if(locationName != null && !locationName.equals(GenericDevice.LOCATION_UNKNOWN)){
 			List<Cooler> currentCoolers = getCoolers();
 			for (Cooler cooler : currentCoolers) {
-				String heaterLocation = (String)cooler.getPropertyValue(GenericDevice.LOCATION_PROPERTY_NAME);
-				if(locationName.equals(heaterLocation)){
+				String coolLocation = (String)cooler.getPropertyValue(GenericDevice.LOCATION_PROPERTY_NAME);
+				if(locationName.equals(coolLocation)){
 					result.add(cooler);
 				}
 			}
@@ -206,6 +213,27 @@ public class SimpleIcasaComponent {
 	 * Obtiene los temómetros que se encuentran en la zona indicada.
 	 * 
 	 * @param locationName zona de interés.
+	 * 
+	 * @return
+	 */
+	private List<Thermometer> getThermometerIn(String locationName){
+		List<Thermometer> result = new ArrayList<Thermometer>();
+		if(locationName != null && !locationName.equals(GenericDevice.LOCATION_UNKNOWN)){
+			List<Thermometer> currentThermometers = getThermometers();
+			for (Thermometer thermometer : currentThermometers) {
+				String thermometerLocation = (String)thermometer.getPropertyValue(GenericDevice.LOCATION_PROPERTY_NAME);
+				if(locationName.equals(thermometerLocation)){
+					result.add(thermometer);
+				}
+			}
+		}		
+		return result;
+	}
+	
+	/**
+	 * 
+	 * Obtiene todas la zonas que contienen por lo menos un termometro.
+	 * 
 	 * @return
 	 */
 	private Map<String,List<Thermometer>> getZonesthatcontainThermometers(){
@@ -294,12 +322,12 @@ public class SimpleIcasaComponent {
 						 //Se asume que todos los termómetros de una zona perciben al misma temperatura.
 						 double temperatur = (getZonesthatcontainThermometers().get(zone).get(0)).getTemperature();
 						 
-						 if(temperatur>300){//Si la temperatura es mayor a 300 se debe enfriar la zona.							
-							 setPowerLevelToAllCoolers(zone,1);
+						 if(temperatur>MAX_TEMPERATUR_ALLOWED){//Si la temperatura es mayor a 300 se debe enfriar la zona.							
+							 setPowerLevelToAllCoolers(zone,DEFAULT_DEVICE_POWER_LEVEL);
 							 setPowerLevelToAllHeaters(zone,0);
-						 }else if(temperatur<290){//Si la temperatura es menor a 290 se debe calentar la zona.	
+						 }else if(temperatur<MIN_TEMPERATUR_ALLOWED){//Si la temperatura es menor a 290 se debe calentar la zona.	
 							 setPowerLevelToAllCoolers(zone,0);
-							 setPowerLevelToAllHeaters(zone,1);
+							 setPowerLevelToAllHeaters(zone,DEFAULT_DEVICE_POWER_LEVEL);
 						 }else{//En cualquier otro caso no se hace nada.
 							 setPowerLevelToAllCoolers(zone,0);
 							 setPowerLevelToAllHeaters(zone,0);
@@ -312,6 +340,8 @@ public class SimpleIcasaComponent {
 					Thread.sleep(300);// dormir el hilo por 300 iniciar una nueva revisión.					
 				} catch (InterruptedException e) {
 					setRunning(false);
+				}catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 			
@@ -327,6 +357,7 @@ public class SimpleIcasaComponent {
 	 * @param powerLevel nivel de energía deseado.
 	 */
 	private void setPowerLevelToAllCoolers(String zone,double powerLevel){
+		 //System.out.println("Coolers power level was set to ["+powerLevel+"] in ["+zone+"]");
 		 List<Cooler>coolers =  getCoolerIn(zone);
 		 for(Cooler cooler: coolers){
 			 cooler.setPowerLevel(powerLevel);
@@ -340,6 +371,7 @@ public class SimpleIcasaComponent {
 	 * @param powerLevel nivel de energía deseado.
 	 */
 	private void setPowerLevelToAllHeaters(String zone,double powerLevel){
+		//System.out.println("Heaters power level was set to ["+powerLevel+"] in ["+zone+"]");
 		List<Heater>heaters =  getHeatersIn(zone);
 		 for(Heater heater: heaters){
 			 heater.setPowerLevel(powerLevel);
@@ -369,6 +401,14 @@ public class SimpleIcasaComponent {
 				
 				String location=(String)device.getPropertyValue(GenericDevice.LOCATION_PROPERTY_NAME);
 				System.out.println("Thermometer id: "+device.getSerialNumber()+" , location: "+location);
+				
+				String previousZona=(String)value;
+				
+				if(getThermometerIn(previousZona).size() == 0){
+					System.out.println("There aren't thermometers in the zone ["+previousZona+"]");
+					setPowerLevelToAllCoolers(previousZona,0);
+					setPowerLevelToAllHeaters(previousZona,0);
+				}
 				
 			}else{
 				System.out.println("property: ["+property+"] old value: ["+value+"]");

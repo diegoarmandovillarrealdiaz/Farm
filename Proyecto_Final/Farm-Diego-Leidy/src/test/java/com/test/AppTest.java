@@ -1,5 +1,6 @@
 package com.test;
 
+import co.edu.uis.sistemas.simple.icasa.SimpleIcasaComponent;
 import fr.liglab.adele.icasa.device.GenericDevice;
 import fr.liglab.adele.icasa.device.temperature.Cooler;
 import fr.liglab.adele.icasa.device.temperature.Heater;
@@ -58,14 +59,35 @@ public class AppTest
     /**
      * GenericDevice.LOCATION_UNKNOWN should be different to a regular name. 
      *
-     * @param testName name of the test case
      */
-    public void test()
+    public void testLocationUnknown()
     {
     	String unknown = GenericDevice.LOCATION_UNKNOWN;
     	String testName = "Device A";
     	
     	assertFalse(unknown.equals(testName));
+    		
+    }
+    
+    /**
+     * Check the maximum and minimum temperature values 
+     *
+     */
+    public void testCheckMaxAndMin()
+    {
+    	assertEquals(SimpleIcasaComponent.MAX_TEMPERATUR_ALLOWED, 300);
+    	assertEquals(SimpleIcasaComponent.MIN_TEMPERATUR_ALLOWED, 290);
+    		
+    }
+    
+    
+    /**
+     * The default device power level should be different of 0. 
+     *
+     */
+    public void testCheckMaxDevicePowerlevel()
+    {
+    	assertTrue(SimpleIcasaComponent.DEFAULT_DEVICE_POWER_LEVEL != 0);
     		
     }
 }
